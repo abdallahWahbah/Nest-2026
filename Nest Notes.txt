@@ -1,0 +1,232 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////// Section 2: Basics
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// new project (Ignore in this section)
+## npm init -y
+## npm install @nestjs/common@7.6.17 @nestjs/core@7.6.17 @nestjs/platform-express@7.6.17 reflect-metadata@0.1.13 typescript@4.3.2
+
+Pipes: validate data 
+Guard: user is authenticated !
+Controller: route the request to a particular function
+Service: run business logic
+Repository: Access DB
+
+// to run project
+## npx ts-node-dev src/main.ts
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////// Section 3, 4: module, controller, class-validator, class-transformer, pipes, 
+/////////////////////// Section 5: services, repositories, DI
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+-----------------------------------------------------------------
+-------- new project
+-----------------------------------------------------------------
+
+// install nest cli globally (only one time on PC)
+## npm install -g @nestjs/cli
+
+// new project
+## nest new projectName
+
+// run project
+## npm run start:dev
+
+
+
+// you need to comment everything in "eslint.config.mjs" to disbale annoying errors
+-----------------------------------------------------------------
+-------- module
+-----------------------------------------------------------------
+## nest generate module moduleName
+
+
+-----------------------------------------------------------------
+-------- controller
+-----------------------------------------------------------------
+## nest generate controller controllerName
+
+// explained in the course >>>>> ##nest generate controller messages/message --flat >>> first "messages" is the "existing folder", second "messages" is the controller name, --flat so as not to create new folder "controllers" inside "messages" folder
+
+
+
+-----------------------------------------------------------------
+-------- service: for business logic
+-----------------------------------------------------------------
+## nest generate service serviceName
+
+
+
+-----------------------------------------------------------------
+-------- class-validator, class-transformer
+-----------------------------------------------------------------
+## npm i class-validator
+## npm i class-transformer
+
+
+
+-----------------------------------------------------------------
+-------- pipes (for validations: dto)
+-----------------------------------------------------------------
+
+// to use pipes:
+// open main.ts and add the following in bootstrap()
+
+app.useGlobalPipes(new ValidationPipe({
+    whitelist: true // to make sure that in incoming requests, we don't have extra properties (signup: only email and password) 
+}));
+// now you can make dto and use it
+
+
+
+-----------------------------------------------------------------
+-------- Dependency Injection (DI)
+-----------------------------------------------------------------
+// to use it 
+1- Injectable() decorator: mark the class (Repository or Service....) with Injectable() decorator
+2- provide it in providers[] in app.module.ts
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////// section 6: DI between different modules
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  // in this section
+  // PowerService is used in CpuModule & DiskModule
+  // CpuService & DiskService are used in ComputerController
+
+// please open power.module.ts file and follow files if not clear here
+
+// to use "PowerService" into another service like "CpuService"
+1- we export the service from "PowerModule" (in which "PowerService" is imported)
+2- we import "PowerModule" in "CpuModule" in the imports[]
+3- use DI in "CpuService" to access "PowerService"
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////// section 8: TypeORM
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+-----------------------------------------------------------------
+-------- Typeorm
+-----------------------------------------------------------------
+## npm install @nestjs/typeorm typeorm sqlite3
+
+// to use TypeOrm
+1- open app.module.ts
+2- add to imports []
+  import {TypeOrm} from "@nestjs/typeorm";
+  TypeOrmModule.forRoot({
+      type: "sqlite",
+      database: "db.sqlite",
+      entities: [],
+      synchronize: true
+    }),
+
+// to create entity 
+// entity creates repository automatically for the object we are creating
+1- create entity class "user.entity.ts"
+2- connect it to the parent's module imports[] >> "user.module.ts"
+  imports: [TypeOrmModule.forFeature([UserEntity])],
+3- add it to entities[] in imports[] in "app.module.ts"
+  entities: [UserEntity],
+
+
+// SQLite extension: only one time 
+// when running program and trying to open db.sqlite >> error
+// add SQLite extension, open view >> Command palette and write SQLite >> choose open Database >> db.sqlite
+// it will add "SQLITE EXPLORER" in the explorer window
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////// section 10: Interceptor
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+-----------------------------------------------------------------
+-------- Interceptor
+-----------------------------------------------------------------
+
+## nest generate interceptor interceptorName
+
+// then use it in the proper controller (used in users.controller.ts)
+
+// how to apply global interceptors (not recommended) >>>> add the following code to the module you wanna add the interceptor globally to (app.module, user.module....)
+
+providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: MyGlobalInterceptor,
+    },
+  ],
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////// section 11: Cookies, guard
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+-----------------------------------------------------------------
+-------- cookies
+-----------------------------------------------------------------
+
+## npm install cookie-session @types/cookie-session
+
+1- main.ts >> add the following code 
+
+const cookieSession = require("cookie-session");
+app.use(cookieSession({
+    keys: ["sessionTempKey"]
+  }));
+
+2-users.controller.ts >> storing and using data inside the session object
+
+@Get("/colors/:color")
+    setColorToSession(@Param("color") color: string, @Session() session: any){
+        session.color = color; // now the session{} looks like this >> session{color: 'redForExample'}
+    }
+    @Get("/colors")
+    getLastColors(@Session() session: any){
+        return session.color;
+    }
+
+
+
+-----------------------------------------------------------------
+-------- guards
+-----------------------------------------------------------------
+
+## nest generate guard auth
+
+1- generate the auth
+2- add it to the controller (or specific method in the controller) "user.controller.ts"
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////// section 12: Unit testing
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// create the testing file
+// open package.json and change script "test:watch" >>>>>> "test:watch": "jest --watch --maxWorkers=1"
+
+## npm run test:watch
+// p
+// write the file name
+
+
+
+
+
+
+
+
+
+
+
+
